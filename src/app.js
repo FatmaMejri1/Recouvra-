@@ -11,7 +11,14 @@ app.get("/health", (req, res) => {
 
 //auth routees
 const authRoutes = require("./routes/authRoutes");
-
 app.use("/auth", authRoutes);
+
+//user 
+const userRoutes = require ("./routes/userRoutes"); 
+app.use("/users" , userRoutes); 
+
+
+
+
 
 module.exports = app;
