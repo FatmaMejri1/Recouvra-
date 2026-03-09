@@ -1,8 +1,10 @@
 const express = require("express");
-
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpecs = require("./config/swagger");
 const app = express();
 
 app.use(express.json());
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 app.get("/health", (req, res) => {
   res.json({ message: "API running" });
@@ -31,5 +33,8 @@ app.use("/payments", paymentRoutes);
 
 const recoveryActionRoutes = require("./routes/recoveryActionRoutes");
 app.use("/recovery-actions", recoveryActionRoutes);
+
+const statsRoutes = require("./routes/statsRoutes");
+app.use("/stats", statsRoutes);
 
 module.exports = app;
