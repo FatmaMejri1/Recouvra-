@@ -16,69 +16,236 @@ tags:
   - name: RecoveryActions
   - name: Stats
 
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        role:
+          type: string
+          enum: [admin, agent, viewer]
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+
+    Client:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+        client:
+          type: string
+        amount:
+          type: number
+        dueDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [pending, paid, overdue]
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+        invoice:
+          type: string
+        amount:
+          type: number
+        date:
+          type: string
+          format: date-time
+        method:
+          type: string
+          enum: [cash, bank_transfer, check, card]
+        notes:
+          type: string
+
+    RecoveryAction:
+      type: object
+      required: [invoiceId, action]
+      properties:
+        id:
+          type: string
+        invoiceId:
+          type: string
+          description: The ID of the associated invoice
+        performedBy:
+          type: string
+          description: The ID of the agent who performed the action
+        action:
+          type: string
+          enum: [call client, send email, visit client, other]
+        date:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Stats:
+      type: object
+      properties:
+        totalInvoices:
+          type: integer
+        totalClients:
+          type: integer
+        totalPaid:
+          type: number
+        totalPending:
+          type: number
+        totalOverdue:
+          type: number
+        recoveryRate:
+          type: number
+          description: Percentage of recovered debt
+
+security:
+  - bearerAuth: []
+
 paths:
 
-  # =========================
-  # AUTH
-  # =========================
-  /auth/login:
+  # ─── AUTH ───────────────────────────────────────────────────────────────────
+
+  /auth/register:
     post:
-      tags:
-        - Auth
-      summary: Login user
+      tags: [Auth]
+      summary: Register a new user
+      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
+              $ref: '#/components/schemas/RegisterRequest'
       responses:
-        200:
-          description: Login successful
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error or email already taken
 
-  # =========================
-  # USERS
-  # =========================
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+
+  
+
+  
+  # ─── USERS ──────────────────────────────────────────────────────────────────
+
   /users:
     get:
-      tags:
-        - Users
+      tags: [Users]
       summary: Get all users
       responses:
-        200:
+        '200':
           description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
     post:
-      tags:
-        - Users
+      tags: [Users]
       summary: Create new user
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                email:
-                  type: string
-                password:
-                  type: string
-                role:
-                  type: string
+              $ref: '#/components/schemas/RegisterRequest'
       responses:
-        201:
+        '201':
           description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
 
   /users/{id}:
     get:
-      tags:
-        - Users
+      tags: [Users]
       summary: Get user by ID
       parameters:
         - in: path
@@ -87,11 +254,16 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
     put:
-      tags:
-        - Users
+      tags: [Users]
       summary: Update user
       parameters:
         - in: path
@@ -113,11 +285,16 @@ paths:
                 role:
                   type: string
       responses:
-        200:
+        '200':
           description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
     delete:
-      tags:
-        - Users
+      tags: [Users]
       summary: Delete user
       parameters:
         - in: path
@@ -126,23 +303,28 @@ paths:
           schema:
             type: string
       responses:
-        204:
+        '204':
           description: User deleted
+        '404':
+          description: User not found
 
-  # =========================
-  # CLIENTS
-  # =========================
+  # ─── CLIENTS ────────────────────────────────────────────────────────────────
+
   /clients:
     get:
-      tags:
-        - Clients
+      tags: [Clients]
       summary: Get all clients
       responses:
-        200:
+        '200':
           description: List of clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
     post:
-      tags:
-        - Clients
+      tags: [Clients]
       summary: Create client
       requestBody:
         required: true
@@ -150,21 +332,26 @@ paths:
           application/json:
             schema:
               type: object
+              required: [name, email]
               properties:
                 name:
                   type: string
                 email:
                   type: string
+                  format: email
                 phone:
                   type: string
       responses:
-        201:
+        '201':
           description: Client created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
 
   /clients/{id}:
     get:
-      tags:
-        - Clients
+      tags: [Clients]
       summary: Get client by ID
       parameters:
         - in: path
@@ -173,11 +360,16 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: Client found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '404':
+          description: Client not found
     put:
-      tags:
-        - Clients
+      tags: [Clients]
       summary: Update client
       parameters:
         - in: path
@@ -196,14 +388,20 @@ paths:
                   type: string
                 email:
                   type: string
+                  format: email
                 phone:
                   type: string
       responses:
-        200:
+        '200':
           description: Client updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '404':
+          description: Client not found
     delete:
-      tags:
-        - Clients
+      tags: [Clients]
       summary: Delete client
       parameters:
         - in: path
@@ -212,23 +410,28 @@ paths:
           schema:
             type: string
       responses:
-        204:
+        '204':
           description: Client deleted
+        '404':
+          description: Client not found
 
-  # =========================
-  # INVOICES
-  # =========================
+  # ─── INVOICES ───────────────────────────────────────────────────────────────
+
   /invoices:
     get:
-      tags:
-        - Invoices
+      tags: [Invoices]
       summary: Get all invoices
       responses:
-        200:
+        '200':
           description: List of invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invoice'
     post:
-      tags:
-        - Invoices
+      tags: [Invoices]
       summary: Create invoice
       requestBody:
         required: true
@@ -236,6 +439,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: [client, amount, dueDate]
               properties:
                 client:
                   type: string
@@ -243,14 +447,22 @@ paths:
                   type: number
                 dueDate:
                   type: string
+                  format: date
+                status:
+                  type: string
+                  enum: [pending, paid, overdue]
+                  default: pending
       responses:
-        201:
+        '201':
           description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
 
   /invoices/{id}:
     get:
-      tags:
-        - Invoices
+      tags: [Invoices]
       summary: Get invoice by ID
       parameters:
         - in: path
@@ -259,11 +471,16 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: Invoice found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '404':
+          description: Invoice not found
     put:
-      tags:
-        - Invoices
+      tags: [Invoices]
       summary: Update invoice
       parameters:
         - in: path
@@ -284,12 +501,21 @@ paths:
                   type: number
                 dueDate:
                   type: string
+                  format: date
+                status:
+                  type: string
+                  enum: [pending, paid, overdue]
       responses:
-        200:
+        '200':
           description: Invoice updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '404':
+          description: Invoice not found
     delete:
-      tags:
-        - Invoices
+      tags: [Invoices]
       summary: Delete invoice
       parameters:
         - in: path
@@ -298,36 +524,71 @@ paths:
           schema:
             type: string
       responses:
-        204:
+        '204':
           description: Invoice deleted
+        '404':
+          description: Invoice not found
 
-  # =========================
-  # PAYMENTS
-  # =========================
+ 
+
+  # ─── PAYMENTS ───────────────────────────────────────────────────────────────
+
   /payments:
+    get:
+      tags: [Payments]
+      summary: Get all payments
+      responses:
+        '200':
+          description: List of payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+
     post:
-      tags:
-        - Payments
-      summary: Record payment
+      tags: [Payments]
+      summary: Record a payment
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required: [invoice, amount]
               properties:
                 invoice:
                   type: string
+                  description: Invoice ID
+                  example: 69aeab0b5de09bb6d1bba4dd
                 amount:
                   type: number
+                  example: 500
+                method:
+                  type: string
+                  enum: [cash, bank transfer, check, card]
+                  default: cash
+                date:
+                  type: string
+                  format: date-time
+                  example: 2026-03-09T19:43:25.714Z
+
       responses:
-        201:
+        '201':
           description: Payment recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          description: Validation error
+        '404':
+          description: Invoice not found
 
   /payments/{id}:
     get:
-      tags:
-        - Payments
+      tags: [Payments]
       summary: Get payment by ID
       parameters:
         - in: path
@@ -336,11 +597,52 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: Payment found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '404':
+          description: Payment not found
+
+    put:
+      tags: [Payments]
+      summary: Update payment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                  example: 300
+                method:
+                  type: string
+                  enum: [cash, bank transfer, check, card]
+                date:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Payment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '404':
+          description: Payment not found
+
     delete:
-      tags:
-        - Payments
+      tags: [Payments]
       summary: Delete payment
       parameters:
         - in: path
@@ -349,23 +651,27 @@ paths:
           schema:
             type: string
       responses:
-        204:
+        '200':
           description: Payment deleted
+        '404':
+          description: Payment not found
+  # ─── RECOVERY ACTIONS ───────────────────────────────────────────────────────
 
-  # =========================
-  # RECOVERY ACTIONS
-  # =========================
   /recovery-actions:
     get:
-      tags:
-        - RecoveryActions
+      tags: [RecoveryActions]
       summary: Get all recovery actions
       responses:
-        200:
+        '200':
           description: List of recovery actions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecoveryAction'
     post:
-      tags:
-        - RecoveryActions
+      tags: [RecoveryActions]
       summary: Create recovery action
       requestBody:
         required: true
@@ -373,21 +679,30 @@ paths:
           application/json:
             schema:
               type: object
+              required: [invoiceId, action]
               properties:
-                invoice:
+                invoiceId:
                   type: string
+                  example: 69aeab0b5de09bb6d1bba4dd
                 action:
                   type: string
+                  enum: [call client, send email, visit client, other]
+                  example: call client
                 date:
                   type: string
+                  format: date-time
+                  example: 2026-03-09T19:43:25.714Z
       responses:
-        201:
+        '201':
           description: Recovery action created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoveryAction'
 
   /recovery-actions/{id}:
     get:
-      tags:
-        - RecoveryActions
+      tags: [RecoveryActions]
       summary: Get recovery action by ID
       parameters:
         - in: path
@@ -396,11 +711,16 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: Recovery action found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoveryAction'
+        '404':
+          description: Not found
     put:
-      tags:
-        - RecoveryActions
+      tags: [RecoveryActions]
       summary: Update recovery action
       parameters:
         - in: path
@@ -415,18 +735,25 @@ paths:
             schema:
               type: object
               properties:
-                invoice:
+                invoiceId:
                   type: string
                 action:
                   type: string
+                  enum: [call client, send email, visit client, other]
                 date:
                   type: string
+                  format: date-time
       responses:
-        200:
+        '200':
           description: Recovery action updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecoveryAction'
+        '404':
+          description: Not found
     delete:
-      tags:
-        - RecoveryActions
+      tags: [RecoveryActions]
       summary: Delete recovery action
       parameters:
         - in: path
@@ -435,17 +762,21 @@ paths:
           schema:
             type: string
       responses:
-        204:
+        '204':
           description: Recovery action deleted
+        '404':
+          description: Not found
 
-  # =========================
-  # STATS
-  # =========================
+  # ─── STATS ──────────────────────────────────────────────────────────────────
+
   /stats:
     get:
-      tags:
-        - Stats
-      summary: Get statistics
+      tags: [Stats]
+      summary: Get dashboard statistics
       responses:
-        200:
+        '200':
           description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'

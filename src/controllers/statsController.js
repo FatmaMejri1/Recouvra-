@@ -1,6 +1,6 @@
-const Invoice = require("../models/Invoice");
-const Payment = require("../models/Payment");
-const RecoveryAction = require("../models/RecoveryAction");
+const Invoice = require("../models/invoice");
+const Payment = require("../models/payment");
+const RecoveryAction = require("../models/recoveryAction");
 
 // GET /stats
 exports.getStats = async (req, res) => {
