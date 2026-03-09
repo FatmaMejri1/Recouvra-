@@ -7,10 +7,13 @@ const auth = require("../middlewares/authMiddleware");
 const authorize = require("../middlewares/roleMiddleware");
 
 
-router.post("/", auth(), authorize("admin", "manager"), invoiceController.createInvoice);
-router.get("/", auth(), authorize("admin", "manager"), invoiceController.getInvoices);
-router.get("/:id", auth(), authorize("admin", "manager"), invoiceController.getInvoiceById);
-router.put("/:id", auth(), authorize("admin", "manager"), invoiceController.updateInvoice);
-router.delete("/:id", auth(), authorize("admin"), invoiceController.deleteInvoice);
+const validate = require("../middlewares/validate");  
+const { createInvoiceSchema, updateInvoiceSchema } = require("../validators/invoiceValidator");  
 
-module.exports = router;
+router.post("/", auth(), authorize("admin", "manager"), validate(createInvoiceSchema), invoiceController.createInvoice);  
+router.get("/", auth(), authorize("admin", "manager"), invoiceController.getInvoices);  
+router.get("/:id", auth(), authorize("admin", "manager"), invoiceController.getInvoiceById);  
+router.put("/:id", auth(), authorize("admin", "manager"), validate(updateInvoiceSchema), invoiceController.updateInvoice);  
+router.delete("/:id", auth(), authorize("admin"), invoiceController.deleteInvoice);  
+
+module.exports = router; 
