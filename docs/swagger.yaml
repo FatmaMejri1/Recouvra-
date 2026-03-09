@@ -1,0 +1,451 @@
+openapi: 3.0.0
+info:
+  title: Recouvra+ API
+  description: API for managing debt recovery (clients, invoices, payments, recovery actions)
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+
+tags:
+  - name: Auth
+  - name: Users
+  - name: Clients
+  - name: Invoices
+  - name: Payments
+  - name: RecoveryActions
+  - name: Stats
+
+paths:
+
+  # =========================
+  # AUTH
+  # =========================
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Login successful
+
+  # =========================
+  # USERS
+  # =========================
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      responses:
+        200:
+          description: List of users
+    post:
+      tags:
+        - Users
+      summary: Create new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+      responses:
+        201:
+          description: User created
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: User found
+    put:
+      tags:
+        - Users
+      summary: Update user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                role:
+                  type: string
+      responses:
+        200:
+          description: User updated
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: User deleted
+
+  # =========================
+  # CLIENTS
+  # =========================
+  /clients:
+    get:
+      tags:
+        - Clients
+      summary: Get all clients
+      responses:
+        200:
+          description: List of clients
+    post:
+      tags:
+        - Clients
+      summary: Create client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        201:
+          description: Client created
+
+  /clients/{id}:
+    get:
+      tags:
+        - Clients
+      summary: Get client by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Client found
+    put:
+      tags:
+        - Clients
+      summary: Update client
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        200:
+          description: Client updated
+    delete:
+      tags:
+        - Clients
+      summary: Delete client
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Client deleted
+
+  # =========================
+  # INVOICES
+  # =========================
+  /invoices:
+    get:
+      tags:
+        - Invoices
+      summary: Get all invoices
+      responses:
+        200:
+          description: List of invoices
+    post:
+      tags:
+        - Invoices
+      summary: Create invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client:
+                  type: string
+                amount:
+                  type: number
+                dueDate:
+                  type: string
+      responses:
+        201:
+          description: Invoice created
+
+  /invoices/{id}:
+    get:
+      tags:
+        - Invoices
+      summary: Get invoice by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Invoice found
+    put:
+      tags:
+        - Invoices
+      summary: Update invoice
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client:
+                  type: string
+                amount:
+                  type: number
+                dueDate:
+                  type: string
+      responses:
+        200:
+          description: Invoice updated
+    delete:
+      tags:
+        - Invoices
+      summary: Delete invoice
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Invoice deleted
+
+  # =========================
+  # PAYMENTS
+  # =========================
+  /payments:
+    post:
+      tags:
+        - Payments
+      summary: Record payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                invoice:
+                  type: string
+                amount:
+                  type: number
+      responses:
+        201:
+          description: Payment recorded
+
+  /payments/{id}:
+    get:
+      tags:
+        - Payments
+      summary: Get payment by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Payment found
+    delete:
+      tags:
+        - Payments
+      summary: Delete payment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Payment deleted
+
+  # =========================
+  # RECOVERY ACTIONS
+  # =========================
+  /recovery-actions:
+    get:
+      tags:
+        - RecoveryActions
+      summary: Get all recovery actions
+      responses:
+        200:
+          description: List of recovery actions
+    post:
+      tags:
+        - RecoveryActions
+      summary: Create recovery action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                invoice:
+                  type: string
+                action:
+                  type: string
+                date:
+                  type: string
+      responses:
+        201:
+          description: Recovery action created
+
+  /recovery-actions/{id}:
+    get:
+      tags:
+        - RecoveryActions
+      summary: Get recovery action by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Recovery action found
+    put:
+      tags:
+        - RecoveryActions
+      summary: Update recovery action
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                invoice:
+                  type: string
+                action:
+                  type: string
+                date:
+                  type: string
+      responses:
+        200:
+          description: Recovery action updated
+    delete:
+      tags:
+        - RecoveryActions
+      summary: Delete recovery action
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Recovery action deleted
+
+  # =========================
+  # STATS
+  # =========================
+  /stats:
+    get:
+      tags:
+        - Stats
+      summary: Get statistics
+      responses:
+        200:
+          description: Dashboard statistics
