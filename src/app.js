@@ -29,4 +29,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 app.use("/payments", paymentRoutes);
 
 
+const recoveryActionRoutes = require("./routes/recoveryActionRoutes");
+app.use("/recovery-actions", recoveryActionRoutes);
+
 module.exports = app;
