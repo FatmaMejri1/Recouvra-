@@ -5,17 +5,13 @@ const recoveryActionController = require("../controllers/recoveryActionControlle
 const auth = require("../middlewares/authMiddleware");
 const authorize = require("../middlewares/roleMiddleware");
 
-router.post("/", auth(), authorize("admin", "manager", "agent"), recoveryActionController.createRecoveryAction);
+const validate = require("../middlewares/validate");  
+const { createRecoveryActionSchema, updateRecoveryActionSchema } = require("../validators/recoveryActionValidator");  
 
+router.post("/", auth(), authorize("admin", "manager", "agent"), validate(createRecoveryActionSchema), recoveryActionController.createRecoveryAction);  
+router.get("/", auth(), authorize("admin", "manager", "agent"), recoveryActionController.getRecoveryActions);  
+router.get("/:id", auth(), authorize("admin", "manager", "agent"), recoveryActionController.getRecoveryActionById);  
+router.put("/:id", auth(), authorize("admin", "manager"), validate(updateRecoveryActionSchema), recoveryActionController.updateRecoveryAction);  
+router.delete("/:id", auth(), authorize("admin"), recoveryActionController.deleteRecoveryAction);  
 
-router.get("/", auth(), authorize("admin", "manager", "agent"), recoveryActionController.getRecoveryActions);
-
-router.get("/:id", auth(), authorize("admin", "manager", "agent"), recoveryActionController.getRecoveryActionById);
-
-
-router.put("/:id", auth(), authorize("admin", "manager"), recoveryActionController.updateRecoveryAction);
-
-
-router.delete("/:id", auth(), authorize("admin"), recoveryActionController.deleteRecoveryAction);
-
-module.exports = router;
+module.exports = router;  
