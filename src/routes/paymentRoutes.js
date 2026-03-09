@@ -6,14 +6,13 @@ const auth = require("../middlewares/authMiddleware");
 const authorize = require("../middlewares/roleMiddleware");
 
 
-router.post("/", auth(), authorize("admin", "manager", "agent"), paymentController.createPayment);
+const validate = require("../middlewares/validate");  
+const { createPaymentSchema, updatePaymentSchema } = require("../validators/paymentValidator");  
 
-router.get("/", auth(), authorize("admin", "manager", "agent"), paymentController.getPayments);
+router.post("/", auth(), authorize("admin", "manager", "agent"), validate(createPaymentSchema), paymentController.createPayment);  
+router.get("/", auth(), authorize("admin", "manager", "agent"), paymentController.getPayments);  
+router.get("/:id", auth(), authorize("admin", "manager", "agent"), paymentController.getPaymentById);  
+router.put("/:id", auth(), authorize("admin", "manager"), validate(updatePaymentSchema), paymentController.updatePayment);  
+router.delete("/:id", auth(), authorize("admin"), paymentController.deletePayment);  
 
-router.get("/:id", auth(), authorize("admin", "manager", "agent"), paymentController.getPaymentById);
-
-
-router.put("/:id", auth(), authorize("admin", "manager"), paymentController.updatePayment);
-router.delete("/:id", auth(), authorize("admin"), paymentController.deletePayment);
-
-module.exports = router;
+module.exports = router; 
