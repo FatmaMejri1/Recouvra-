@@ -25,4 +25,8 @@ const invoiceRoutes = require("./routes/invoiceRoutes");
 app.use("/invoices", invoiceRoutes);
 
 
+const paymentRoutes = require("./routes/paymentRoutes");
+app.use("/payments", paymentRoutes);
+
+
 module.exports = app;
