@@ -21,5 +21,8 @@ app.use("/users" , userRoutes);
 const clientRoutes = require("./routes/ClientRoutes");
 app.use("/clients", clientRoutes);
 
+const invoiceRoutes = require("./routes/invoiceRoutes");
+app.use("/invoices", invoiceRoutes);
+
 
 module.exports = app;
