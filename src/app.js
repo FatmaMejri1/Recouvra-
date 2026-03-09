@@ -18,7 +18,8 @@ const userRoutes = require ("./routes/userRoutes");
 app.use("/users" , userRoutes); 
 
 
-
+const clientRoutes = require("./routes/ClientRoutes");
+app.use("/clients", clientRoutes);
 
 
 module.exports = app;
