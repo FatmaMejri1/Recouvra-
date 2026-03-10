@@ -29,12 +29,12 @@ Recouvra+ is a powerful and secure REST API designed to streamline the debt reco
 
 ---
 
-## 📋 Prerequisites
+##  Prerequisites
 
 Before you begin, ensure you have the following installed:
-- Node.js (v18 or higher recommended)
-- MongoDB (Running locally or an Atlas URI)
-- npm or yarn
+- Node.js (v18 or higher )
+- MongoDB (Running locally )
+- npm 
 
 ---
 
@@ -54,7 +54,7 @@ Once running, the server will be available at `http://localhost:3000`.
 
 ---
 
-## 📖 API Documentation
+##  API Documentation
 
 The API includes built-in Swagger documentation. Once the server is running, you can access the interactive UI at:
 
@@ -64,7 +64,7 @@ This allows you to view all endpoints, request bodies, and test the API directly
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 The project includes a comprehensive test suite using Jest and Supertest.
 
