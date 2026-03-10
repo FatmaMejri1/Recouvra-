@@ -119,7 +119,7 @@ components:
 
     RecoveryAction:
       type: object
-      required: [invoiceId, action]
+      required: [invoiceId, performedBy, action]
       properties:
         id:
           type: string
@@ -679,11 +679,14 @@ paths:
           application/json:
             schema:
               type: object
-              required: [invoiceId, action]
+              required: [invoiceId, performedBy, action]
               properties:
                 invoiceId:
                   type: string
                   example: 69aeab0b5de09bb6d1bba4dd
+                performedBy:
+                  type: string
+                  example: 69aeab0b5de09bb6d1bba4dc
                 action:
                   type: string
                   enum: [call client, send email, visit client, other]
@@ -736,6 +739,8 @@ paths:
               type: object
               properties:
                 invoiceId:
+                  type: string
+                performedBy:
                   type: string
                 action:
                   type: string
